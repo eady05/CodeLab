@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner" // 경로 확인!
 import { Providers } from "@/components/providers";
 import "./globals.css";
+import Script from "next/script"; // 1. Script 임포트
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default function RootLayout({
           {children}
           <Toaster position="top-center" richColors />
         </Providers>
+        <Script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js" strategy="afterInteractive" />
       </body>
     </html>
   );
