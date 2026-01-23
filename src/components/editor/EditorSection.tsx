@@ -84,6 +84,8 @@ ${code}
     }
   };
 
+
+  // 3. C++ 실행 (Wandbox API 사용)
   const runCpp = async () => {
     try {
       const response = await fetch("https://wandbox.org/api/compile.json", {
