@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/sonner" // 경로 확인!
 import { Providers } from "@/components/providers";
 import "./globals.css";
 import Script from "next/script"; // 1. Script 임포트
+import Navbar from "@/components/shared/Navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,7 +32,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          {children}
+          <div className="flex flex-col min-h-screen">
+            <Navbar />
+            <main className="flex-1"> {/* children이 남은 공간을 다 차지함 */}
+              {children}
+            </main>
+          </div>
           <Toaster position="top-center" richColors />
         </Providers>
         <Script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js" strategy="afterInteractive" />

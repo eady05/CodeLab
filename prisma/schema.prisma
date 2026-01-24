@@ -22,7 +22,10 @@ model User {
   image         String?      // 필수
   baekjoonId    String?      @unique // 백준 아이디
   tier          Int?         @default(0) // 백준 티어 (숫자)
-  solvedCount   Int?         @default(0) // 해결한 문제 수
+  solvedCount   Int?         @default(0) // 해결한 문제 수ㅞ
+  programmersId  String?      @unique // 프로그래머스용 아이디
+  githubToken    String?  // 개인 토큰 (암호화해서 저장하는 게 좋지만 우선은 String)
+  githubRepo     String?  // 예: "my-username/algo-repo"
   accounts      Account[]    // 관계 추가
   sessions      Session[]    // 관계 추가
   submissions   Submission[]
@@ -65,13 +68,18 @@ model VerificationToken {
 model Submission {
   id        Int      @id @default(autoincrement())
   problemId String   // 문제 번호 (예: "1000")
+  title     String?  // 문제 제목
+  level     String?  // ✅ 추가: "Bronze", "Silver" 등 티어 정보 저장
   code      String   @db.Text // 아주 긴 코드도 저장 가능하도록 Text 타입 지정
   language  String   // "python", "javascript", "cpp"
   status    String?  // "SUCCESS", "FAIL" (나중에 채점 결과 저장용)
-  
+  platform  String   @default("BAEKJOON") // BAEKJOON, PROGRAMMERS 등
+  githubUrl String?  // 깃허브 원본 파일 주소 (나중에 바로가기 만들 때 유용)
   // 관계 설정: 누가 제출했는지만 기록
   userId    Int
   user      User     @relation(fields: [userId], references: [id])
   
   createdAt DateTime @default(now())
+  
+  @@unique([userId, problemId, platform, language])  // 같은 유저가 같은 문제를 중복해서 동기화하지 않도록 제약
 }
