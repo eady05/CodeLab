@@ -7,9 +7,9 @@ import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { Button } from "@/components/ui/button";
 import { fetchProblemAction } from "@/actions/problem-action";
-import ProblemViewer from '@/components/problem/ProblemViewer';
-import ProblemSearchModal from '@/components/problem/ProblemSearchModal';
-import EditorSection from "@/components/editor/EditorSection";
+import ProblemViewer from '@/components/domain/problem/ProblemViewer';
+import ProblemSearchModal from '@/components/domain/problem/ProblemSearchModal';
+import EditorSection from "@/components/domain/editor/EditorSection";
 
 export default function HomePage() {
   const { data: session } = useSession();
