@@ -35,18 +35,20 @@ export default function ProblemSearchModal({ onSelect }: Props) {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="
       gap-2 
-      border-slate-700 
-      bg-slate-800/50 
-      text-slate-100       /* 👈 글자색을 밝은 화이트/그레이로 명시 */
-      hover:bg-slate-700 
-      hover:text-white 
-      hover:border-slate-500
+      border-slate-300 dark:border-slate-700 
+      bg-white dark:bg-slate-800/50 
+      text-slate-700 dark:text-slate-100
+      hover:bg-slate-100 dark:hover:bg-slate-700 
+      hover:text-slate-900 dark:hover:text-white 
+      hover:border-slate-400 dark:hover:border-slate-500
       transition-all
     ">
           <Search className="w-4 h-4" /> 문제 바꾸기
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] bg-slate-900 border-slate-800 text-slate-50">
+
+      {/* 다이얼로그 본체 */}
+      <DialogContent className="sm:max-w-[500px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-50">
         <DialogHeader>
           <DialogTitle>백준 문제 가져오기</DialogTitle>
         </DialogHeader>
@@ -56,22 +58,27 @@ export default function ProblemSearchModal({ onSelect }: Props) {
             placeholder="문제 번호 입력 (예: 1000)"
             value={id}
             onChange={(e) => setId(e.target.value)}
-            className="bg-slate-950 border-slate-700"
+            className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           />
-          <Button onClick={handleSearch} disabled={loading}>
+          <Button
+            onClick={handleSearch}
+            disabled={loading}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
             {loading ? "검색 중..." : "검색"}
           </Button>
         </div>
 
         {preview && (
-          <div className="mt-4 p-4 rounded-md bg-slate-950 border border-slate-800">
-            <h4 className="font-bold text-blue-400 mb-2">{preview.title}</h4>
-            <p className="text-sm text-slate-400 line-clamp-3 mb-4">
-              {/* HTML 태그를 제거하고 텍스트만 미리보기 */}
+          <div className="mt-4 p-4 rounded-md bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+            <h4 className="font-bold text-blue-600 dark:text-blue-400 mb-2">{preview.title}</h4>
+            <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3 mb-4">
               {preview.description.replace(/<[^>]*>?/gm, '').slice(0, 150)}...
             </p>
-            <Button className="w-full" onClick={handleConfirm}>이 문제 풀기</Button>
+            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={handleConfirm}>
+              이 문제 풀기
+            </Button>
           </div>
         )}
       </DialogContent>

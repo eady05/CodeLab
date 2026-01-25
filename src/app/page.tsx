@@ -12,17 +12,13 @@ import ProblemSearchModal from '@/components/domain/problem/ProblemSearchModal';
 import EditorSection from "@/components/domain/editor/EditorSection";
 
 export default function HomePage() {
-  const { data: session } = useSession();
-  const [code, setCode] = useState("// 여기에 코드를 작성하세요\n");
-  const [userInput, setUserInput] = useState("");
-  const [output, setOutput] = useState("Ready to compile...");
 
   const [problem, setProblem] = useState<any>(null);
   const [problemId, setProblemId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-60px)] bg-slate-950 text-slate-50 overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-60px)] dark:bg-[#0a0e14] bg-white slate-950 text-slate-50 overflow-hidden">
       <main className="flex flex-1 overflow-hidden">
         {/* 1. 왼쪽: 문제 영역 */}
         <section className="w-[40%] flex flex-col border-r border-slate-800 bg-slate-900/20 relative">

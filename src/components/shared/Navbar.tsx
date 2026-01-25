@@ -4,6 +4,7 @@ import { signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Layout, LogOut, User } from "lucide-react";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface NavbarProps {
   problemId?: string;
@@ -14,7 +15,7 @@ export default function Navbar({ problemId }: NavbarProps) {
 
   return (
     // 배경색을 에디터 배경과 일치시키고, 하단 보더를 아주 가늘게 설정했습니다.
-    <header className="w-full flex items-center justify-between px-6 py-3 border-b border-white/5 bg-[#0a0e14] sticky top-0 z-50">
+    <header className="w-full flex items-center justify-between px-6 py-3 border-b border-white/5 dark:bg-[#0a0e14] bg-white sticky top-0 z-50">
 
       {/* 좌측: 로고 섹션 */}
       <div className="flex items-center gap-5">
@@ -59,6 +60,7 @@ export default function Navbar({ problemId }: NavbarProps) {
                 <p className="text-xs font-bold text-slate-200 leading-none">{session.user?.name}</p>
               </div>
             </Link>
+            <ThemeToggle />
 
             <div className="h-4 w-[1px] bg-slate-800 mx-1" />
 

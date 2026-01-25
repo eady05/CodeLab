@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { python } from '@codemirror/lang-python';
 import { cpp } from '@codemirror/lang-cpp';
 import { oneDark } from '@codemirror/theme-one-dark';
+import { vscodeLight } from "@uiw/codemirror-theme-vscode";
 import { Button } from "@/components/ui/button";
 import { Play, Terminal } from "lucide-react"; // 아이콘 추가
+import { useTheme } from "next-themes";
 
 //예제 입력 받을 prop
 interface EditorSectionProps {
@@ -26,7 +28,12 @@ export default function EditorSection({ sampleInput }: EditorSectionProps) {
   const [code, setCode] = useState(LANGUAGES.javascript.initial);
   const [userInput, setUserInput] = useState("");
   const [output, setOutput] = useState("Ready to compile...");
+  const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleRun = async () => {
     setOutput("Running...");
@@ -121,11 +128,11 @@ ${code}
   return (
     <section className="flex-1 flex flex-col overflow-hidden">
       {/* 1. 상단 에디터 영역 */}
-      <div className="flex-1 overflow-auto bg-[#282c34] relative">
+      <div className="flex-1 overflow-auto bg-slate-50 dark:bg-[#282c34] relative transition-colors duration-300">
         <CodeMirror
           value={code}
           height="100%"
-          theme={oneDark}
+          theme={mounted && theme === "light" ? vscodeLight : oneDark}
           extensions={[LANGUAGES[lang].extension]}
           onChange={(value) => setCode(value)}
           className="text-base"
@@ -133,12 +140,13 @@ ${code}
       </div>
 
       {/* 2. 하단 콘솔 섹션 */}
-      <div className="h-[35%] border-t border-slate-800 flex flex-col bg-slate-900">
+      <div className="h-[35%] border-t border-slate-200 dark:border-slate-800 flex flex-col bg-white dark:bg-slate-900 transition-colors">
+
         {/* 콘솔 헤더 */}
-        <div className="flex justify-between items-center px-4 py-2 border-b border-slate-800 bg-slate-950/50">
+        <div className="flex justify-between items-center px-4 py-2 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <Terminal className="w-4 h-4 text-slate-500" />
+              <Terminal className="w-4 h-4 text-slate-400 dark:text-slate-500" />
               <span className="text-xs font-bold text-slate-500 uppercase tracking-tighter">Console</span>
             </div>
 
@@ -150,7 +158,7 @@ ${code}
                 setLang(selected);
                 setCode(LANGUAGES[selected].initial);
               }}
-              className="bg-slate-800 text-[11px] text-slate-300 border border-slate-700 rounded px-2 py-0.5 outline-none focus:ring-1 focus:ring-blue-500"
+              className="bg-white dark:bg-slate-800 text-[11px] text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 rounded px-2 py-0.5 outline-none focus:ring-1 focus:ring-blue-500"
             >
               {Object.entries(LANGUAGES).map(([key, obj]) => (
                 <option key={key} value={key}>{obj.label}</option>
@@ -161,7 +169,7 @@ ${code}
           <Button
             onClick={handleRun}
             size="sm"
-            className="bg-blue-600 hover:bg-blue-700 h-7 text-xs px-4 gap-2"
+            className="bg-blue-600 hover:bg-blue-700 h-7 text-xs px-4 gap-2 text-white"
           >
             <Play className="w-3 h-3 fill-current" /> Run Code
           </Button>
@@ -170,10 +178,10 @@ ${code}
         {/* 입출력 패널 */}
         <div className="flex flex-1 overflow-hidden">
           {/* INPUT */}
-          <div className="flex-1 border-r border-slate-800 flex flex-col">
-            <div className="px-3 py-1 text-[10px] text-slate-500 bg-slate-950/30 border-b border-slate-800">INPUT</div>
+          <div className="flex-1 border-r border-slate-200 dark:border-slate-800 flex flex-col">
+            <div className="px-3 py-1 text-[10px] text-slate-400 dark:text-slate-500 bg-slate-50/50 dark:bg-slate-950/30 border-b border-slate-200 dark:border-slate-800">INPUT</div>
             <textarea
-              className="flex-1 w-full p-3 bg-transparent font-mono text-sm resize-none focus:outline-none text-blue-300 placeholder:text-slate-700"
+              className="flex-1 w-full p-3 bg-transparent font-mono text-sm resize-none focus:outline-none text-blue-600 dark:text-blue-300 placeholder:text-slate-300 dark:placeholder:text-slate-700"
               placeholder="데이터를 입력하세요..."
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
@@ -181,9 +189,9 @@ ${code}
           </div>
 
           {/* OUTPUT */}
-          <div className="flex-1 flex flex-col bg-slate-950/20">
-            <div className="px-3 py-1 text-[10px] text-slate-500 bg-slate-950/30 border-b border-slate-800">OUTPUT</div>
-            <pre className="flex-1 p-3 font-mono text-sm text-green-400 overflow-auto whitespace-pre-wrap">
+          <div className="flex-1 flex flex-col bg-slate-50/30 dark:bg-slate-950/20">
+            <div className="px-3 py-1 text-[10px] text-slate-400 dark:text-slate-500 bg-slate-50/50 dark:bg-slate-950/30 border-b border-slate-200 dark:border-slate-800">OUTPUT</div>
+            <pre className="flex-1 p-3 font-mono text-sm text-green-600 dark:text-green-400 overflow-auto whitespace-pre-wrap">
               {`> ${output}`}
             </pre>
           </div>
