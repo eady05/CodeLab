@@ -9,31 +9,29 @@ import { oneDark } from '@codemirror/theme-one-dark';
 import { vscodeLight } from "@uiw/codemirror-theme-vscode";
 import { Button } from "@/components/ui/button";
 import { Play, Terminal } from "lucide-react"; // 아이콘 추가
-import { useTheme } from "next-themes";
+import { useMountedTheme } from "@/hooks/use-mounted-theme";
+import { LANGUAGES } from "@/lib/editor-config";
+import AiResultModal from "@/components/domain/editor/AiResultModal"; // 방금 만든 모달 임포트
+import { getAiGrading } from "@/services/aiService"; // 서비스 호출
+import { Progress } from "@/components/ui/progress"; // 👈 Radix 기반 Progress 추가
 
 //예제 입력 받을 prop
 interface EditorSectionProps {
+  problemId?: string;
+  problemData?: any; // 문제 지문 데이터
   sampleInput?: string; // 백준 예제 입력을 받을 통로
 }
 
-// 언어별 설정
-const LANGUAGES = {
-  javascript: { label: "JavaScript", extension: javascript(), initial: "// JS 코드를 작성하세요\nconsole.log('Hello Lab!');" },
-  python: { label: "Python", extension: python(), initial: "# Python 코드를 작성하세요\nprint('Hello Lab!')" },
-  cpp: { label: "C++", extension: cpp(), initial: "// C++ 코드를 작성하세요\n#include <iostream>\nint main() { return 0; }" },
-};
-
-export default function EditorSection({ sampleInput }: EditorSectionProps) {
+export default function EditorSection({ problemId, problemData, sampleInput }: EditorSectionProps) {
   const [lang, setLang] = useState<keyof typeof LANGUAGES>("javascript");
-  const [code, setCode] = useState(LANGUAGES.javascript.initial);
+  const [code, setCode] = useState(LANGUAGES[lang].initial);
   const [userInput, setUserInput] = useState("");
   const [output, setOutput] = useState("Ready to compile...");
-  const { theme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const { theme, mounted } = useMountedTheme(); //테마 색
+  const [isGrading, setIsGrading] = useState(false); //채점
+  const [progress, setProgress] = useState(0); // 진행률 상태
+  const [aiResult, setAiResult] = useState<any>(null); // 결과 저장용
+  const [isModalOpen, setIsModalOpen] = useState(false); // 모달 오픈 상태
 
   const handleRun = async () => {
     setOutput("Running...");
@@ -44,6 +42,42 @@ export default function EditorSection({ sampleInput }: EditorSectionProps) {
       await runPython();
     } else if (lang === 'cpp') {
       await runCpp();
+    }
+  };
+
+  const handleAiGrade = async () => {
+    setIsGrading(true);
+    setProgress(0); // 시작 시 초기화
+
+    // 💡 게이지를 0%에서 90%까지 부드럽게 올리는 가짜 타이머
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 90) {
+          clearInterval(interval);
+          return 90;
+        }
+        return prev + Math.floor(Math.random() * 5) + 2; // 조금씩 랜덤하게 상승
+      });
+    }, 200);
+
+    try {
+      const result = await getAiGrading(problemData.description, code, lang);
+
+      setProgress(100); // 💡 결과 나오면 즉시 100%로!
+
+      // 사용자에게 100%를 보여주기 위해 아주 잠깐 대기 후 모달 띄우기
+      setTimeout(() => {
+        setAiResult(result);
+        setIsModalOpen(true);
+        setIsGrading(false); // 로딩 오버레이 닫기
+      }, 500);
+
+    } catch (error) {
+      console.error(error);
+      setOutput("⚠️ AI 채점 중 오류가 발생했습니다.");
+      setIsGrading(false);
+    } finally {
+      clearInterval(interval);
     }
   };
 
@@ -127,6 +161,24 @@ ${code}
 
   return (
     <section className="flex-1 flex flex-col overflow-hidden">
+      {/* 💡 로딩 오버레이: Radix Progress 사용 */}
+      {isGrading && (
+        <div className="absolute inset-0 z-[110] flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-sm transition-all">
+          <div className="w-full max-w-md px-10 flex flex-col items-center">
+            <div className="flex justify-between w-full items-end mb-4">
+              <h3 className="text-xl font-bold text-white tracking-tight">AI 채점 중...</h3>
+              <span className="text-sm font-mono text-purple-400">{progress}%</span>
+            </div>
+
+            {/* 🛠️ Radix UI Progress 컴포넌트 */}
+            <Progress value={progress} className="h-2 w-full bg-slate-800" />
+
+            <p className="mt-6 text-slate-400 text-sm animate-pulse">
+              Gemini가 코드를 분석하고 있습니다.
+            </p>
+          </div>
+        </div>
+      )}
       {/* 1. 상단 에디터 영역 */}
       <div className="flex-1 overflow-auto bg-slate-50 dark:bg-[#282c34] relative transition-colors duration-300">
         <CodeMirror
@@ -156,7 +208,9 @@ ${code}
               onChange={(e) => {
                 const selected = e.target.value as keyof typeof LANGUAGES;
                 setLang(selected);
-                setCode(LANGUAGES[selected].initial);
+                if (code === LANGUAGES[lang].initial || code === "") {
+                  setCode(LANGUAGES[selected].initial);
+                }
               }}
               className="bg-white dark:bg-slate-800 text-[11px] text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 rounded px-2 py-0.5 outline-none focus:ring-1 focus:ring-blue-500"
             >
@@ -166,13 +220,40 @@ ${code}
             </select>
           </div>
 
-          <Button
-            onClick={handleRun}
-            size="sm"
-            className="bg-blue-600 hover:bg-blue-700 h-7 text-xs px-4 gap-2 text-white"
-          >
-            <Play className="w-3 h-3 fill-current" /> Run Code
-          </Button>
+
+          <div className="flex gap-2">
+            {/* 1. Run Code 버튼 */}
+            <Button
+              onClick={handleRun}
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-700 h-7 text-xs px-4 gap-2 text-white"
+            >
+              <Play className="w-3 h-3 fill-current" /> Run Code
+            </Button>
+
+            {/* 2. AI 채점 버튼 (스타일 통일) */}
+            <Button
+              onClick={handleAiGrade}
+              size="sm"
+              disabled={isGrading}
+              // h-7, text-xs, px-4를 똑같이 주고, 아이콘(Sparkles 등)을 넣으면 더 예뻐요!
+              className="bg-purple-600 hover:bg-purple-700 h-7 text-xs px-4 gap-2 text-white transition-all disabled:opacity-50"
+            >
+              {isGrading ? (
+                <span className="animate-spin text-[10px]">🌀</span>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-3 h-3"
+                >
+                  <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.5 3c1.557 0 2.955.69 3.906 1.815C12.354 3.69 13.75 3 15.306 3 18.092 3 20.25 5.322 20.25 8.25c0 3.924-2.438 7.11-4.739 9.27a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001z" />
+                </svg>
+              )}
+              {isGrading ? "채점 중..." : "AI 채점 (Gemini)"}
+            </Button>
+          </div>
         </div>
 
         {/* 입출력 패널 */}
@@ -197,6 +278,12 @@ ${code}
           </div>
         </div>
       </div>
+      {/* AI 채점 결과 모달 */}
+      <AiResultModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        result={aiResult}
+      />
     </section>
   );
 }

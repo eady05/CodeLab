@@ -39,7 +39,10 @@ export default function HomePage() {
         </section>
 
         {/* 2. 오른쪽: 에디터 + 콘솔 (Editor & Console) */}
-        <EditorSection />
+        <EditorSection
+          problemId={problemId}
+          problemData={problem}
+        />
       </main>
     </div>
   );

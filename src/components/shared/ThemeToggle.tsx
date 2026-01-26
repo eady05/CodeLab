@@ -4,15 +4,10 @@ import * as React from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import { useMountedTheme } from "@/hooks/use-mounted-theme";
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
-
-  // 서버사이드 렌더링 시 발생하는 Hydration 오류 방지
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+  const { theme, setTheme, mounted } = useMountedTheme(); // 👈 딱 한 줄!
 
   if (!mounted) {
     return <div className="w-9 h-9" />; // 마운트 전에는 빈 공간 유지

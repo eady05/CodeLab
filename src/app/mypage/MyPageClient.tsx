@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { updateBaekjoonId, updateGithubSettings, syncGithubSubmissions } from "@/app/mypage/actions";
+import CodeViewModal from "@/components/domain/editor/CodeViewModal"; // 경로 확인!
 
 interface MyPageProps {
   user: {
@@ -37,6 +38,7 @@ interface MyPageProps {
 export default function MyPageClient({ user, submissions }: MyPageProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [bjId, setBjId] = useState(user.baekjoonId || "");
+  const [proId, setProId] = useState(user.programmersId || "");
   const [isPending, setIsPending] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -48,6 +50,7 @@ export default function MyPageClient({ user, submissions }: MyPageProps) {
     String(sub.problemId).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  //백준아이디 연동
   const handleBJIdUpdate = async () => {
     if (!bjId) return;
     setIsPending(true);
@@ -60,6 +63,8 @@ export default function MyPageClient({ user, submissions }: MyPageProps) {
     }
     setIsPending(false);
   };
+
+
 
   const getLevelStyle = (level: string | null, platform: string) => {
     const lvl = level || '';
@@ -113,7 +118,7 @@ export default function MyPageClient({ user, submissions }: MyPageProps) {
                 </div>
               </div>
             </div>
-
+            {/**
             <div className="p-6 border border-slate-200 dark:border-slate-800 rounded-3xl bg-white dark:bg-slate-900/50 flex flex-col justify-between group hover:border-emerald-500/50 transition-all shadow-sm">
               <div className="flex justify-between items-start">
                 <Award className="w-8 h-8 text-emerald-500 mb-2" />
@@ -127,6 +132,7 @@ export default function MyPageClient({ user, submissions }: MyPageProps) {
                 </div>
               </div>
             </div>
+             */}
 
             <div className="p-6 border border-slate-200 dark:border-slate-800 rounded-3xl bg-white dark:bg-slate-900/50 flex flex-col justify-between group hover:border-slate-400 dark:hover:border-white/30 transition-all shadow-sm">
               <div className="flex justify-between items-start">
@@ -189,8 +195,12 @@ export default function MyPageClient({ user, submissions }: MyPageProps) {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-slate-400 dark:text-slate-500">{new Date(sub.createdAt).toLocaleDateString()}</td>
-                    <td className="px-6 py-4">
-                      <button onClick={() => toast(sub.code || "코드가 없습니다.")} className="text-slate-400 hover:text-blue-500 font-medium transition-colors">코드 보기</button>
+                    <td className="px-6 py-4 text-center">
+                      <CodeViewModal
+                        code={sub.code}
+                        title={sub.title || `문제 #${sub.problemId}`}
+                        language={sub.language}
+                      />
                     </td>
                     <td className="px-6 py-4">
                       <button onClick={() => sub.githubUrl && window.open(sub.githubUrl, '_blank')} className="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
