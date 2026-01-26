@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { encrypt, decrypt } from "@/services/encryption";
 
 //백준 아이디 업데이트
 export async function updateBaekjoonId(userId: number, baekjoonId: string) {
@@ -33,9 +34,10 @@ export async function updateBaekjoonId(userId: number, baekjoonId: string) {
 //github 세팅 업데이트 (추가 기능 예시)
 export async function updateGithubSettings(userId: number, token: string, repo: string) {
   try {
+    const encryptedToken = encrypt(token.trim()); // 👈 토큰 암호화
     await prisma.user.update({
       where: { id: userId },
-      data: { githubToken: token, githubRepo: repo },
+      data: { githubToken: encryptedToken, githubRepo: repo },
     });
     revalidatePath("/mypage");
     return { success: true };
@@ -53,12 +55,13 @@ export async function syncGithubSubmissions(userId: number) {
     return { success: false, error: "GitHub 설정을 먼저 완료해주세요." };
   }
   try {
+    const decryptedToken = decrypt(user.githubToken); // 👈 토큰 복호화
     // 💡 recursive=1 옵션으로 모든 하위 폴더/파일 구조를 한 번에 가져옴
     const treeRes = await fetch(
       `https://api.github.com/repos/${user.githubRepo}/git/trees/main?recursive=1`,
       {
         headers: {
-          Authorization: `Bearer ${user.githubToken.trim()}`,
+          Authorization: `Bearer ${decryptedToken}`,
           Accept: "application/vnd.github.v3+json",
         },
         cache: 'no-store'

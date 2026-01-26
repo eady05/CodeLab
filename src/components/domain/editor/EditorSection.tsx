@@ -2,9 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
-import { javascript } from '@codemirror/lang-javascript';
-import { python } from '@codemirror/lang-python';
-import { cpp } from '@codemirror/lang-cpp';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { vscodeLight } from "@uiw/codemirror-theme-vscode";
 import { Button } from "@/components/ui/button";
@@ -12,7 +9,7 @@ import { Play, Terminal } from "lucide-react"; // 아이콘 추가
 import { useMountedTheme } from "@/hooks/use-mounted-theme";
 import { LANGUAGES } from "@/lib/editor-config";
 import AiResultModal from "@/components/domain/editor/AiResultModal"; // 방금 만든 모달 임포트
-import { getAiGrading } from "@/services/aiService"; // 서비스 호출
+import { getAiGrading } from "@/services/ai-service"; // 서비스 호출
 import { Progress } from "@/components/ui/progress"; // 👈 Radix 기반 Progress 추가
 
 //예제 입력 받을 prop
