@@ -184,7 +184,7 @@ ${code}
           theme={mounted && theme === "light" ? vscodeLight : oneDark}
           extensions={[LANGUAGES[lang].extension]}
           onChange={(value) => setCode(value)}
-          className="text-base"
+          className="text-base h-full"
         />
       </div>
 

@@ -123,3 +123,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* globals.css 또는 해당 컴포넌트 CSS */
+.cm-editor {
+  height: 100% !important;
+}
+
+.cm-scroller {
+  overflow: auto !important;
+}
