@@ -23,7 +23,7 @@ export const LANGUAGES: Record<string, LanguageConfig> = {
   cpp: {
     label: "C++",
     extension: cpp(),
-    initial: "// C++ 코드를 작성하세요\n#include <iostream>\nint main() { return 0; }"
+    initial: "// C++ 코드를 작성하세요\n#include <bits/stdc++.h>\nusing namespace std;\nint main() { return 0; }"
   },
 };
 
