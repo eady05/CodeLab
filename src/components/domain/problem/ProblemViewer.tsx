@@ -15,6 +15,8 @@ interface ProblemViewerProps {
   isLoading: boolean;
 }
 
+import { ExternalLink } from "lucide-react";
+
 export default function ProblemViewer({ problemId, data, isLoading }: ProblemViewerProps) {
   if (isLoading) {
     return <div className="p-6 text-slate-500 animate-pulse">문제를 가져오는 중...</div>;
@@ -27,15 +29,33 @@ export default function ProblemViewer({ problemId, data, isLoading }: ProblemVie
       </div>
     );
   }
-  console.log(data)
+  const problemUrl = `https://www.acmicpc.net/problem/${problemId}`;
 
   return (
     <div className="p-6 overflow-y-auto h-full bg-white dark:bg-slate-900/30 selection:bg-blue-500/30 transition-colors">
+      {/* 제목 및 링크 영역 */}
       <div className="mb-8">
-        <span className="text-blue-600 dark:text-blue-500 font-mono text-sm mb-1 block"># {problemId}</span>
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{data.title}</h2>
-      </div>
+        {/* # 번호와 링크를 한 줄에 배치 */}
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-blue-600 dark:text-blue-500 font-mono text-sm block"># {problemId}</span>
 
+          {problemUrl && (
+            <a
+              href={problemUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center text-slate-400 hover:text-blue-500 transition-colors"
+              title="백준에서 문제 보기"
+            >
+              <ExternalLink size={14} />
+            </a>
+          )}
+        </div>
+
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+          {data.title}
+        </h2>
+      </div>
       <div className="space-y-10 pb-20">
         {/* 반복되는 섹션 구조를 위해 helper 적용 */}
         {[
