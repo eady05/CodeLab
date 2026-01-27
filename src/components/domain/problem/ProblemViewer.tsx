@@ -5,6 +5,8 @@ interface ProblemData {
   description: string;
   inputDescription: string;
   outputDescription: string;
+  sampleInput: string;
+  sampleOutput: string;
 }
 
 interface ProblemViewerProps {
@@ -25,6 +27,7 @@ export default function ProblemViewer({ problemId, data, isLoading }: ProblemVie
       </div>
     );
   }
+  console.log(data)
 
   return (
     <div className="p-6 overflow-y-auto h-full bg-white dark:bg-slate-900/30 selection:bg-blue-500/30 transition-colors">
@@ -38,20 +41,26 @@ export default function ProblemViewer({ problemId, data, isLoading }: ProblemVie
         {[
           { title: "Description", content: data.description },
           { title: "Input", content: data.inputDescription },
-          { title: "Output", content: data.outputDescription }
+          { title: "Output", content: data.outputDescription },
+          { title: "Sample Input", content: data.sampleInput, isSampel: true },
+          { title: "Sample Output", content: data.sampleOutput, isSampel: true }
         ].map((section) => (
           <section key={section.title}>
             <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3 border-b border-slate-200 dark:border-slate-800 pb-1">
               {section.title}
             </h3>
-            <div
-              className="prose prose-slate dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 leading-relaxed 
-                     prose-headings:text-slate-900 dark:prose-headings:text-slate-100
-                     prose-code:text-blue-600 dark:prose-code:text-blue-400
-                     prose-code:bg-slate-100 dark:prose-code:bg-slate-800/50
-                     prose-code:px-1 prose-code:rounded"
-              dangerouslySetInnerHTML={{ __html: section.content }}
-            />
+            {section.isSampel ? (
+              /* ✅ 예제 입출력을 위한 전용 스타일 */
+              <pre className="p-4 bg-slate-100 dark:bg-slate-800/50 rounded-lg font-mono text-sm text-slate-700 dark:text-slate-300 overflow-x-auto whitespace-pre-wrap">
+                {section.content}
+              </pre>
+            ) : (
+              /* 일반 설명 텍스트 */
+              <div
+                className="prose prose-slate dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: section.content }}
+              />
+            )}
           </section>
         ))}
       </div>
