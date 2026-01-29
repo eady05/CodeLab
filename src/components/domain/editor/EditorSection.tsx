@@ -95,28 +95,59 @@ export default function EditorSection({ problemId, problemData, sampleInput }: E
     }
   };
 
-  // 2. Python 실행 (Pyodide 사용)
+
   const runPython = async () => {
     try {
       if (!window.loadPyodide) {
-        setOutput("❌ Python 엔진을 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+        setOutput("❌ Python 엔진을 불러오는 중입니다.");
         return;
       }
       const pyodide = await window.loadPyodide();
 
-      // 표준 입력(stdin) 시뮬레이션 및 출력 가로채기
       let pyLogs = "";
-      pyodide.setStdout({ batched: (str: string) => { pyLogs += str + "\n"; } });
 
-      // Python 코드 내에서 input() 함수가 userInput을 읽도록 설정
+      // 표준 출력 가로채기
+      pyodide.setStdout({
+        write: (data: any): number => {
+          // 1. 어떤 데이터가 들어오든 문자로 강제 변환
+          let content = "";
+          if (typeof data === 'number') {
+            content = String.fromCharCode(data);
+          } else if (data instanceof Uint8Array || data instanceof Int8Array) {
+            // 혹시 배열 형태로 들어올 경우를 대비
+            content = new TextDecoder().decode(data);
+          } else {
+            content = String(data);
+          }
+
+          // 2. 문자열로 확실히 더하기 (+= 를 쓰기 전에 문자열임을 보장)
+          pyLogs = pyLogs + content;
+
+          // 3. 처리한 길이를 반환
+          return data.length !== undefined ? data.length : 1;
+        }
+      });
       const fullCode = `
 import sys, io
-sys.stdin = io.StringIO("""${userInput}""")
+
+# [핵심] 모든 출력을 버퍼링 없이 즉시 내보내도록 설정
+sys.stdout.reconfigure(line_buffering=False, write_through=True)
+
+# 입력값 설정
+sys.stdin = io.StringIO(${JSON.stringify(userInput)})
+
+# 사용자 코드 실행
 ${code}
+
+# [핵심] 코드가 끝난 후 남아있는 버퍼 강제로 비우기
+sys.stdout.flush()
     `;
 
       await pyodide.runPythonAsync(fullCode);
-      setOutput(pyLogs.trim() || "실행 완료 (출력 없음)");
+
+      // trim()을 빼고 결과 확인 (공백 자체가 결과일 수 있으므로)
+      setOutput(pyLogs || "실행 완료 (출력 없음)");
+
     } catch (err: any) {
       setOutput(`⚠️ Python Error: ${err.message}`);
     }
